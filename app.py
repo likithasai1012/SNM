@@ -45,7 +45,7 @@ def userregister():
             #send_mail(to=useremail, body=f"Your OTP is {otp}", subject="OTP Verification")
             # send_mail(to=useremail, body=f"Your OTP is {otp}", subject="OTP Verification")
             print("OTP:", otp)
-            flash("OTP sent to email")
+            flash(f"Your OTP is {otp}")
             return redirect(url_for('otpverify', endata=entoken(userdata)))
         else:
             flash("Email already exists")
