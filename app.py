@@ -42,7 +42,9 @@ def userregister():
         if email_count[0] == 0:
             otp = genotp()
             userdata = {'useremail':useremail,'username':username,'password':password,'gotp':otp}
-            send_mail(to=useremail, body=f"Your OTP is {otp}", subject="OTP Verification")
+            #send_mail(to=useremail, body=f"Your OTP is {otp}", subject="OTP Verification")
+            # send_mail(to=useremail, body=f"Your OTP is {otp}", subject="OTP Verification")
+            print("OTP:", otp)
             flash("OTP sent to email")
             return redirect(url_for('otpverify', endata=entoken(userdata)))
         else:
