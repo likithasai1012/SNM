@@ -6,7 +6,7 @@ from stoken import entoken, dntoken
 import flask_excel as excel
 from mimetypes import guess_type
 import re
-import psycopg2
+import psycopg
 import os
 
 app = Flask(__name__)
@@ -14,7 +14,7 @@ app.secret_key = 'zoro@123'
 excel.init_excel(app)
 
 # DB CONNECTION
-conn = psycopg2.connect(
+conn = psycopg.connect(
     host=os.getenv("DB_HOST"),
     user=os.getenv("DB_USER"),
     password=os.getenv("DB_PASSWORD"),
