@@ -35,7 +35,12 @@ def userregister():
 
         if email_count[0] == 0:
             otp = genotp()
-            userdata = {'useremail':useremail,'username':username,'password':password,'gotp':otp}
+            userdata = {
+                'useremail': useremail,
+                'username': username,
+                'password': password,
+                'gotp': otp
+            }
 
             print("OTP:", otp)
             flash(f"Your OTP is {otp}")
@@ -83,7 +88,7 @@ def userlogin():
 
         if data and data[0] == password:
             session['user'] = email
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('viewallnotes'))  # go directly to notes
         else:
             flash("Invalid credentials")
 
@@ -94,11 +99,11 @@ def userlogin():
 @app.route('/dashboard')
 def dashboard():
     if session.get('user'):
-        return render_template('dashboard.html')
+        return redirect(url_for('viewallnotes'))
     return redirect(url_for('userlogin'))
 
 
-# ADD NOTES
+# ADD NOTES ✅ FIXED
 @app.route('/addnotes', methods=['POST'])
 def addnotes():
     if session.get('user'):
@@ -110,10 +115,12 @@ def addnotes():
         uid = cursor.fetchone()[0]
 
         cursor.execute(
-            "INSERT INTO notes(title,discription,added_by) VALUES(%s,%s,%s)",
+            "INSERT INTO notes(title, description, added_by) VALUES(%s,%s,%s)",
             (title, desc, uid)
         )
         conn.commit()
+
+        flash("Note added successfully")
         return redirect(url_for('viewallnotes'))
 
     return redirect(url_for('userlogin'))
@@ -134,7 +141,7 @@ def viewallnotes():
     return redirect(url_for('userlogin'))
 
 
-# UPDATE NOTE
+# UPDATE NOTE ✅ FIXED
 @app.route('/updatenotes/<int:nid>', methods=['GET','POST'])
 def updatenotes(nid):
     if session.get('user'):
@@ -145,10 +152,11 @@ def updatenotes(nid):
             desc = request.form['description']
 
             cursor.execute(
-                "UPDATE notes SET title=%s, discription=%s WHERE nid=%s",
+                "UPDATE notes SET title=%s, description=%s WHERE nid=%s",
                 (title, desc, nid)
             )
             conn.commit()
+
             flash("Note updated successfully")
             return redirect(url_for('viewallnotes'))
 
@@ -167,6 +175,7 @@ def deletenotes(nid):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM notes WHERE nid=%s", (nid,))
         conn.commit()
+
         flash("Note deleted successfully")
         return redirect(url_for('viewallnotes'))
 
