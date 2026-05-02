@@ -9,10 +9,14 @@ import flask_excel as excel
 from mimetypes import guess_type
 import re
 # Set up the database connection
-mydb = mysql.connector.connect(user='root', host='localhost', password='101121', database='snmproject')
-app = Flask(__name__)
-app.secret_key = 'zoro@123'
-excel.init_excel(app)
+import os
+
+mydb = mysql.connector.connect(
+    host=os.getenv("DB_HOST"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    database=os.getenv("DB_NAME")
+)
 
 @app.route('/')
 def home():
@@ -340,4 +344,7 @@ def userlogout():
     else:
         flash('please login first')
         return redirect(url_for('userlogin'))            
-app.run(debug=True, use_reloader=True)
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
