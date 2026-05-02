@@ -1,17 +1,11 @@
-from flask import Flask, request, render_template, redirect, url_for, flash, send_file, session 
+from flask import Flask, request, render_template, redirect, url_for, flash, session
 from otp import genotp
-from cmail import send_mail
-from io import BytesIO
 from stoken import entoken, dntoken
-import flask_excel as excel
-from mimetypes import guess_type
-import re
 import psycopg
 import os
 
 app = Flask(__name__)
 app.secret_key = 'zoro@123'
-excel.init_excel(app)
 
 # DB CONNECTION
 conn = psycopg.connect(
@@ -42,10 +36,10 @@ def userregister():
         if email_count[0] == 0:
             otp = genotp()
             userdata = {'useremail':useremail,'username':username,'password':password,'gotp':otp}
-            #send_mail(to=useremail, body=f"Your OTP is {otp}", subject="OTP Verification")
-            # send_mail(to=useremail, body=f"Your OTP is {otp}", subject="OTP Verification")
+
             print("OTP:", otp)
             flash(f"Your OTP is {otp}")
+
             return redirect(url_for('otpverify', endata=entoken(userdata)))
         else:
             flash("Email already exists")
@@ -120,7 +114,7 @@ def addnotes():
             (title, desc, uid)
         )
         conn.commit()
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('viewallnotes'))
 
     return redirect(url_for('userlogin'))
 
@@ -136,6 +130,45 @@ def viewallnotes():
         )
         data = cursor.fetchall()
         return render_template('dashboard.html', all_notesdata=data)
+
+    return redirect(url_for('userlogin'))
+
+
+# UPDATE NOTE
+@app.route('/updatenotes/<int:nid>', methods=['GET','POST'])
+def updatenotes(nid):
+    if session.get('user'):
+        cursor = conn.cursor()
+
+        if request.method == 'POST':
+            title = request.form['title']
+            desc = request.form['description']
+
+            cursor.execute(
+                "UPDATE notes SET title=%s, discription=%s WHERE nid=%s",
+                (title, desc, nid)
+            )
+            conn.commit()
+            flash("Note updated successfully")
+            return redirect(url_for('viewallnotes'))
+
+        cursor.execute("SELECT * FROM notes WHERE nid=%s", (nid,))
+        data = cursor.fetchone()
+
+        return render_template('update.html', notes_data=data)
+
+    return redirect(url_for('userlogin'))
+
+
+# DELETE NOTE
+@app.route('/deletenotes/<int:nid>')
+def deletenotes(nid):
+    if session.get('user'):
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM notes WHERE nid=%s", (nid,))
+        conn.commit()
+        flash("Note deleted successfully")
+        return redirect(url_for('viewallnotes'))
 
     return redirect(url_for('userlogin'))
 
