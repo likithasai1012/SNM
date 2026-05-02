@@ -155,7 +155,7 @@ def updatenotes(nid):
         cursor.execute("SELECT * FROM notes WHERE nid=%s", (nid,))
         data = cursor.fetchone()
 
-        return render_template('update.html', notes_data=data)
+        return render_template('updatenotes.html', notes_data=data)
 
     return redirect(url_for('userlogin'))
 
